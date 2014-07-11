@@ -33,36 +33,6 @@ the data to the slave nodes. _mongod_ is the process which is resposible for all
 the database activities as well as replication processes. The minimum
 recommended number of slave servers are 3.
 
-### Sharding (Horizontal Scaling) .
-------------------------------------------------
-
-![Alt text](images/sharding.png "Sharding")
-
-Sharding works by partioning the data into seperate chunks and allocating
-diffent ranges of chunks to diffrent shard servers. The figure above shows a
-collection which has 90 documents which have been sharded across the three
-server: the first shard getting ranges from 1-29,  and so on. When a client wants
-to access a certian document it contacts the query router (mongos process),
-which in turn contacts the 'configuration node', a lightweight mongod
-process) that keeps a record of which ranges of chunks are distributed across
-which shards. 
-
-Please do note that every shard server should be backed by a replica set, so
-that when data is written/queried copies of the data are available. So in a
-three-shard deployment we would require 3 replica sets and primaries of each
-would act as the sharding server.
-
-Here are the basic steps of how sharding works:
-
-1) A new database is created, and collections are added.
-
-2) New documents get updated when clients update, and all the new documents
-goes into a single shard.
-
-3) When the size of collection in a shard exceeds the 'chunk_size' the
-collection is split and balanced across shards.
-
-
 ### Deploying MongoDB Ansible
 --------------------------------------------
 
@@ -72,13 +42,12 @@ collection is split and balanced across shards.
 ![Alt text](images/site.png "Site")
   
 The diagram above illustrates the deployment model for a MongoDB cluster deployed by
-Ansible. This deployment model focuses on deploying three shard servers,
-each having a replica set, with the backup replica servers serving as the other two shard
-primaries. The configuration servers are co-located with the shards. The _mongos_
-servers are best deployed on seperate servers. This is the minimum recomended
-configuration for a production-grade MongoDB deployment. Please note that the
-playbooks are capable of deploying N node clusters, not limited to three. Also,
-all the processes are secured using keyfiles.
+Ansible. This deployment model focuses on deploying three servers,
+each having a replica set primaries. The configuration servers are co-located with
+the replicas. The _mongos_ servers are best deployed on seperate servers. This is the
+ minimum recomended configuration for a production-grade MongoDB deployment. Please
+note that the playbooks are capable of deploying N node clusters, not limited to three.
+Also, all the processes are secured using keyfiles.
 
 #### Prerequisite
 
