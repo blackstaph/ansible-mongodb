@@ -1,4 +1,4 @@
-##Deploying a sharded, production-ready MongoDB cluster with Ansible
+##Deploying a production-ready MongoDB cluster with Ansible
 ------------------------------------------------------------------------------
 
 - Requires Ansible 1.2
@@ -136,27 +136,6 @@ replication set, we should get a similar output.
 		}
 
 
-We can check the status of the shards as follows: connect to the mongos service
-'mongo localhost:8888/admin -u admin -p 123456' and issue the following command to get
-the status of the Shards:
-
-
-		 
-		mongos> sh.status()
-		--- Sharding Status --- 
-		  sharding version: { "_id" : 1, "version" : 3 }
-		  shards:
-			{  "_id" : "web2",  "host" : "web2/web2:2013,web3:2013" }
-			{  "_id" : "web3",  "host" : "web3/web2:2014,web3:2014" }
-  		databases:
-			{  "_id" : "admin",  "partitioned" : false,  "primary" : "config" }
-
-
-We can also make sure the sharding works by creating a database, a collection,
-and populate it with documents and check if the chunks of the collection are
-balanced equally across nodes. The below diagram illustrates the verification
-step.
-
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ![Alt text](images/check.png "check")
@@ -166,17 +145,17 @@ The above mentioned steps can be tested with an automated playbook.
 Issue the following command to run the test. Pass one of the _mongos_ servers
 in the _servername_ variable.
 		
-		ansible-playbook -i hosts playbooks/testsharding.yml -e servername=server1
+		ansible-playbook -i hosts playbooks/testrep.yml -e servername=server1
 
 
-Once the playbook completes, we check if the sharding has succeeded by logging
+Once the playbook completes, we check if the replication has succeeded by logging
 on to any mongos server and issuing the following command. The output displays
-the number of chunks spread across the shards.
+the number of chunks spread across the replicas.
 
 		mongos> sh.status()
-			--- Sharding Status --- 
-  			sharding version: { "_id" : 1, "version" : 3 }
-  			shards:
+			--- Replica Status --- 
+  			replica version: { "_id" : 1, "version" : 3 }
+  			Replicas:
 			{  "_id" : "bensible",  "host" : "bensible/bensible:20103,web2:20103,web3:20103" }
 			{  "_id" : "web2",  "host" : "web2/bensible:20105,web2:20105,web3:20105" }
 			{  "_id" : "web3",  "host" : "web3/bensible:20102,web2:20102,web3:20102" }
@@ -233,14 +212,14 @@ execute the following command:
 ###Verification.
 -----------------------------
 
-The newly added node can be easily verified by checking the sharding status and
+The newly added node can be easily verified by checking the replica status and
 seeing the chunks being rebalanced to the newly added node.
 
 			$/usr/bin/mongo localhost:8888/admin -u admin -p 123456
 			mongos> sh.status()
-				--- Sharding Status --- 
-  				sharding version: { "_id" : 1, "version" : 3 }
-  			shards:
+				--- rep Status --- 
+  				Replica version: { "_id" : 1, "version" : 3 }
+  			Replicas:
 			{  "_id" : "bensible",  "host" : "bensible/bensible:20103,web2:20103,web3:20103" }
 			{  "_id" : "web2",  "host" : "web2/bensible:20105,web2:20105,web3:20105" }
 			{  "_id" : "web3",  "host" : "web3/bensible:20102,web2:20102,web3:20102" }
